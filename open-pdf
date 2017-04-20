@@ -1,0 +1,2 @@
+#!/bin/sh
+TMP=$(mktemp); curl "$1" > $TMP; mimeo $TMP

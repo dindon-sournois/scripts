@@ -1,0 +1,2 @@
+#!/bin/bash
+emacsclient -n -c -a "" ~/rev/org/notes.org

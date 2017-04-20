@@ -1,0 +1,6 @@
+#!/bin/bash
+
+setxkbmap -query | awk '
+    BEGIN{layout=""}
+    /^layout/{layout=$2}
+    END{printf("%s\n",layout)}'

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+LOCKER='physlock -d -s'
+OPTIONS="1 Suspend\n2 Suspend and Lock\n3 Lock\n4 Exit\n5 Reboot\n6 Power-off"
+
+if [[ -z "$@" ]]; then
+    echo -e "$OPTIONS"
+
+else
+    opt=$(echo $@|awk '{print $1}')
+    case "$opt" in
+        1)
+            systemctl suspend
+            ;;
+        2)
+            systemctl suspend ; $LOCKER
+            ;;
+        3)
+            $LOCKER
+            ;;
+        4)
+            i3-msg exit
+            ;;
+        5)
+            systemctl reboot
+            ;;
+        6)
+            systemctl poweroff -i
+            ;;
+        *)
+            ;;
+    esac
+fi

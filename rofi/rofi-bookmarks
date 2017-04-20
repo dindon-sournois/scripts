@@ -1,0 +1,127 @@
+#!/bin/bash
+
+LAUNCHER="rofi -width 900 -dmenu -i -l 40 -p"
+URL_LOC="primary" # where to fetch URL: primary, secondary, clipboard
+
+USAGE="Usage: \
+<span font_weight='bold'>Alt+o</span>: open-mode \
+| <span font_weight='bold'>Alt+n</span>: add \
+| <span font_weight='bold'>Alt+r</span>: remove-mode \
+| <span font_weight='bold'>Alt+e</span>: edit"
+KEYS="-kb-custom-1 Alt+o -kb-custom-2 Alt+n -kb-custom-3 Alt+r -kb-custom-4 Alt+e"
+
+function openBookmark()
+{
+    output=$(displayBookmark "bookmarks")
+    retval=$?
+    # return if a special keycombo was pressed
+    [ $retval -ne 0 ] && return $retval
+    # extract buku db index and open it in the default browser
+    buku -o $(echo $output | awk '{print $1}')
+}
+
+function addBookmark()
+{
+    # get window title from xprop, to pre-fill the title dialog
+    win_id=$(xprop -root | grep '_NET_ACTIVE_WINDOW(WINDOW)' | awk '{print $NF}')
+    pretitle=$(xprop -id $win_id | grep '_NET_WM_NAME(UTF8_STRING)' | awk -F '"' '{print $2}' | awk -F '-' '{print $1}')
+
+    # ask for tags, title and url, exit if any response is empty
+    tags=$(buku -p -f2 | awk '{print $3}' | sort -f | uniq | $LAUNCHER tags:)
+    retval=$?
+    # return if a special keycombo was pressed
+    [ $retval -ne 0 ] && return $retval
+    # [ -z $tags ] && exit 1
+
+    # retval=$?
+    title=$(printf "\n-\n$pretitle"| $LAUNCHER title:)
+    # void: fetch, -: empty, else: custom
+    if [ "$title" == "-" ]; then
+     title_opt="--title"
+    elif [ ! -z "$title" ]; then
+        title_opt="--title "$title""
+    fi
+
+    # return if a special keycombo was pressed
+    [ $retval -ne 0 ] && return $retval
+
+    url=$(buku -p -f1 | sort -f | uniq | $LAUNCHER URL: -filter "$(xclip -sel $URL_LOC -o)")
+    retval=$?
+    # return if a special keycombo was pressed
+    [ $retval -ne 0 ] && return $retval
+    [ -z "$url" ] && exit 1
+
+    # TODO: use -filter instead of -mesg, edit on the fly
+    confirm=$(printf "[Y]es\n[N]o\n[E]dit" | $LAUNCHER 'Add the following bookmark:' -mesg "$tags $url")
+    retval=$?
+    if [ $retval -eq 0 ]; then
+        if [ "$confirm" == "[Y]es" ]; then
+            buku -a "$url" "$tags" $title_opt
+        elif [ "$confirm" == "[E]dit" ]; then
+            id=$(buku -f2 -a "$url" "$tags" $title_opt | grep "^[0-9]*" -o)
+            buku -w $id
+        fi
+    fi
+    return $retval
+}
+
+function deleteBookmark()
+{
+    output=$(displayBookmark "removing bookmarks")
+    retval=$?
+    # return if a special keycombo was pressed
+    [ $retval -ne 0 ] && return $retval
+    # ask for confirmation to delete the selected bookmark
+    confirm=$(echo -e "[Y]es\n[N]o" | $LAUNCHER 'Delete the following bookmark:' -mesg "$output" $KEYS)
+    retval=$?
+    ( [ $retval -ne 0 ] || [ "$confirm" != "[Y]es" ] ) && return $retval
+    buku -d $(echo $output | awk '{print $1}')
+    return 12 # continue deleting
+}
+
+function editBookmark()
+{
+    output=$(displayBookmark "edit bookmarks")
+    retval=$?
+    # return if a special keycombo was pressed
+    [ $retval -ne 0 ] && return $retval
+    buku -w $(echo $output | awk '{print $1}')
+}
+
+function displayBookmark()
+{
+    buku -p -f2 \
+        | awk 'NF == 2 { $0 = $0 "NOTAG" }; { $2 = substr($2,0,80); print $1"\t"$2"\t"$3 }' \
+        | column -t -s $'\t' \
+        | $LAUNCHER "$1:" -mesg "$USAGE" $KEYS
+}
+
+
+# main loop
+
+retval=10 # open bookmark
+while [ $retval -ne 0 ]
+do
+    case "$retval" in
+        1)
+            # rofi was closed (e.g. by ESC)
+            exit 0
+            ;;
+        10)
+            openBookmark
+            retval=$?
+            ;;
+        11)
+            addBookmark
+            retval=$?
+            ;;
+        12)
+            deleteBookmark
+            retval=$?
+            ;;
+        13)
+            editBookmark
+            retval=$?
+            ;;
+    esac
+done

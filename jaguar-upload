@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ ! $1 ]
+then
+    echo Missing file to upload
+    exit -1
+fi
+
+host="jaguar"
+target_folder="espaces/www/"
+url="http://loris.lucido.emi.u-bordeaux.fr/"
+
+filename=$(basename $1)
+scp -r $1 $host:$target_folder
+echo -n $url$filename | xclip -sel clip
+
+exit 0

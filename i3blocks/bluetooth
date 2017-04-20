@@ -1,0 +1,15 @@
+#!/bin/bash
+[[ "$(hostname -s)" != "x1c" ]] && exit 1
+
+state=$(bluetooth | ag on | wc -l)
+color="#268bd2"
+if [ $state = 1 ]; then
+    icon=""
+    state="on"
+else
+    icon=""
+    state="off"
+fi
+
+printf "<span foreground=\"%s\">%s %s</span>\n" $color "$icon" "$state";
+printf "<span foreground=\"%s\">%s %s</span>\n" $color "$icon" "$state";

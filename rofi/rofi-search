@@ -1,0 +1,31 @@
+#!/bin/bash
+
+engines=$HOME/.config/rofi/searchengines
+
+if [[ -z "$@" ]]; then
+    triggers=$(awk '{ print $1 }' "$engines")
+    echo -e "$triggers"
+
+else
+    input="$@"
+
+    if [[ "$input" == "/"* ]]; then
+        entry=$(grep $(echo $input | awk '{ print $1 }') "$engines")
+        search=$(echo "$input" | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}')
+        method=$(echo "$entry" | awk '{ print $2 }')
+        arg=$(echo "$entry" | awk '{for (i=3; i<NF; i++) printf $i " "; print $NF}')
+
+        if [[ $method == "mimeo" ]]; then
+            mimeo "$arg$search" &> /dev/null
+        fi
+        
+        if [[ $method == "terminal" ]]; then
+            termite -e "$arg $search" &> /dev/null &
+        fi
+
+        if [[ $method == "window" ]]; then
+            $arg $search &> /dev/null &
+        fi
+        
+    fi
+fi

@@ -1,0 +1,32 @@
+#!/bin/bash
+# lesser priority to greater priority
+
+function mimeo-command {
+    mimeo \
+        --$1 firefox.desktop \
+        --$1 calibre-ebook-viewer.desktop \
+        --$1 inkscape.desktop \
+        --$1 gimp.desktop \
+        --$1 linguist.desktop \
+        --$1 libreoffice-writer.desktop \
+        --$1 libreoffice-math.desktop \
+        --$1 libreoffice-impress.desktop \
+        --$1 libreoffice-draw.desktop \
+        --$1 libreoffice-calc.desktop \
+        --$1 libreoffice-base.desktop \
+        --$1 mumble.desktop \
+        --$1 audacity.desktop \
+        --$1 qpdfview.desktop \
+        --$1 feh.desktop \
+        --$1 mpv.desktop \
+        --$1 qbittorrent.desktop \
+        --$1 Thunar-folder-handler.desktop \
+        --$1 claws-mail.desktop \
+        --$1 zeal.desktop \
+        --$1 wine.desktop \
+        --$1 steam.desktop \
+        --$1 emacs.desktop \
+        --$1 leafpad.desktop
+}
+
+mimeo-command prefer

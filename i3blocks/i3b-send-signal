@@ -1,0 +1,4 @@
+#!/bin/bash
+
+[ "$#" -ne 1 ] && exit -1;
+pkill -SIGRTMIN+$1 i3blocks

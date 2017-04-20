@@ -1,0 +1,30 @@
+#!/bin/bash
+
+[ "$#" -ne 1 ] && exit -1;
+
+function mpc_notify() {
+
+    # send notification only when resuming
+    if [ "$1" = toggle ]; then
+       mpc status | grep "\[playing\]" || exit -1;
+    fi
+
+    song=$(mpc status -f "[[%artist% - ]&[%title%]]|[%file%]" | head -n 1)
+    case "$1" in
+        short) time="";;
+        long|toggle) time=$(mpc status | sed -n 2p | cut -d " " -f5);;
+        *) ;;
+    esac
+    notify-send -u low -t 500 "$song" "$time"
+}
+
+case "$1" in
+   prev) mpc --wait prev && mpc_notify short;;
+   next) mpc --wait next && mpc_notify short;;
+   toggle) mpc toggle --wait && mpc_notify toggle;;
+   status) mpc_notify long;;
+   stop) mpc stop;;
+   minus) mpc volume -5 && i3b-send-signal 5;;
+   plus) mpc volume +5 && i3b-send-signal 5;;
+   *) ;;
+esac

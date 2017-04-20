@@ -1,0 +1,2 @@
+# $1 is the folder
+tar -cz "$1" | netcat -v -l -p 45454

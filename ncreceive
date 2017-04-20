@@ -1,0 +1,3 @@
+# receive from REMOTE_HOST
+REMOTE_HOST="$1"
+netcat -v $REMOTE_HOST 45454 | tar -xz

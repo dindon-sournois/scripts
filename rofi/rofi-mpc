@@ -1,0 +1,15 @@
+#!/bin/bash
+_mpc() { mpc --quiet "$@" 2>/dev/null & }
+
+playlist() {
+  songs="$(mpc playlist -f '%artist% $ %album% $ %title%' | column -t -s $'$')"
+  song="$(echo "$songs" | rofi -lines 50 -width 900 -dmenu "$@")"
+  [ "$song" ] && _mpc play $(echo "$songs" | grep -n "$song" | cut -d ':' -f 1)
+}
+
+cmd=$(mpc help | grep '  mpc [a-z]' | cut -d ' ' -f 4 | rofi -lines 50 -width 900 -dmenu -p 'mpc' "$@")
+
+[ "$cmd" ] && case "$cmd" in
+  playlist) playlist;;
+  *) _mpc "$cmd";;
+esac

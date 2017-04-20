@@ -1,0 +1,7 @@
+battery
+brightness
+memory
+mpdsong
+mpdtime
+mpdvolume
+*.lex.c

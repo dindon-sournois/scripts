@@ -1,8 +1,6 @@
 #!/bin/sh
 
 LAUNCHER="rofi -dmenu -i -lines 20 -p"
-xcmenu --dmenu | $LAUNCHER "rofi-selection:"
-exit 0
 
 USAGE="Usage: \
 <span font_weight='bold'>Alt+o</span>: open-mode \
@@ -20,33 +18,17 @@ KEYS="-kb-custom-1 Alt+o -kb-custom-2 Alt+n -kb-custom-3 Alt+r -kb-custom-4 Alt+
 # NOTE: This is all done in a single line because bash can't store a NUL byte
 function extract_selection()
 {
-    if [ "$1" == "p" ]; then
-        SEL_CMD="-p"
-        SEL_TXT="primary"
-    else
-        SEL_CMD="-c"
-        SEL_TXT="clipboard"
-    fi
-    C_HIST="$(clipster $SEL_CMD -o -n 0 -0 \
-        | gawk 'BEGIN {RS = "\0"; FS="\n"; OFS=" " } { $1=$1; print $0 }'  \
-        | sed 's/^ *//' \
-        | sed '/^$/d' \
-        | gawk '{printf("%3d  %s\n", NR, $0)}')"
+    HIST="$(xcmenu --dmenu  | gawk '{printf("%3d  %s\n", NR, $0)}')"
 
     # Echo clipboard items to Rofi and save the selection made by user
-    SELECTION="$(echo "$C_HIST" | $LAUNCHER $SEL_TXT: -mesg "$USAGE" $KEYS)"
+    SELECTION="$(echo "$HIST" | $LAUNCHER $SEL_TXT: -mesg "$USAGE" $KEYS)"
 
     # Verify user made a selection
     if [ -n "$SELECTION" ]; then
-
-        # Retrieve the line number from the beginning of selection
         NUMBER="$(echo "$SELECTION" | cut -c1-3)"
-        # Extract clipboard history from clipster and find the nth non-empty clip based selected line number
-        EXACT_SELECTION="$(clipster $SEL_CMD -o -n 0 -0 \
-                   | gawk 'BEGIN {RS = "\0"; ORS = "\0"} NF > 0 { print }' \
-                   | gawk 'BEGIN {RS = "\0"}'"NR == $NUMBER { print; exit }")"
-        # Echo the selection back to clipster
-        echo -n "$EXACT_SELECTION" | clipster $SEL_CMD
+        # xcmenu --get $(expr $NUMBER - 1) | tr -d '\n' | xcmenu --input --clipboard
+        # TODO: fix \n at end of output
+        xcmenu --get $(expr $NUMBER - 1) | xclip -sel clip
     fi
 }
 

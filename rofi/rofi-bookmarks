@@ -1,5 +1,6 @@
 #!/bin/bash
 
+EDITOR="$VISUAL"
 LAUNCHER="rofi -width 900 -dmenu -i -l 40 -p"
 URL_LOC="primary" # where to fetch URL: primary, secondary, clipboard
 

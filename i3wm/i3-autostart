@@ -2,8 +2,8 @@
 
 if [[ "$(hostname -s)" == "msi" ]]; then
     if [ $(uname -r | grep vfio -c) -eq 1 ]; then
-        lxpolkit&
-        synergy&
+	true
+        # synergy&
     fi
 fi
 
@@ -13,12 +13,13 @@ fi
 
 # compton -c -b
 # i3-subscribe
-xcmenu -daemon&
-emacs --daemon
+xcmenu -daemon
 mpd
+lxpolkit&
 dunst&
 firefox&
 thunderbird&
 termite -e ncmpcpp --name ncmpcpp&
 i3-focus-last&
 owncloud&
+emacs --daemon

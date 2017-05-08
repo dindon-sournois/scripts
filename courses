@@ -1,0 +1,2 @@
+#!/bin/bash
+emacsclient -n -c -a "" ~/remote/cloud/zaclys/notes/courses.txt

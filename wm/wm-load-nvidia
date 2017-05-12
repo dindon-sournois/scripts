@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
+echo "10de 1b81" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo "10de 10f0" > /sys/bus/pci/drivers/vfio-pci/remove_id
+
+echo 1 > /sys/bus/pci/devices/0000:01:00.0/remove
+echo 1 > /sys/bus/pci/devices/0000:01:00.1/remove
+echo 1 > /sys/bus/pci/rescan
+
+modprobe nvidia

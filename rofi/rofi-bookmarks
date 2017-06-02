@@ -53,6 +53,7 @@ function addBookmark()
     [ -z "$url" ] && exit 1
 
     # TODO: use -filter instead of -mesg, edit on the fly
+    # TODO: show title
     confirm=$(printf "[Y]es\n[N]o\n[E]dit" | $LAUNCHER 'Add the following bookmark:' -mesg "$tags $url")
     retval=$?
     if [ $retval -eq 0 ]; then

@@ -2,3 +2,9 @@
 xhost +SI:localuser:$USER
 xsetroot -cursor_name left_ptr
 exec dbus-launch --exit-with-session emacs --eval "(exwm-enable)"
+
+# How to get layer:
+# cd ~/rev/build/spacemacs
+# git fetch origin  pull/3321/head:SpacemacsOS
+# git co SpacemacsOS
+# git rebase develop

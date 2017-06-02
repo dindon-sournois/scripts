@@ -1,7 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 if [[ "$(hostname -s)" == "msi" ]]; then
-	feh  --bg-fill '/home/llucido/Pictures/wallpapers/nier.jpg' 
+    feh  --bg-fill '/home/llucido/Pictures/wallpapers/solarized/flower.jpg'
 else
-	feh  --bg-fill '/home/llucido/Pictures/wallpapers/solarized/flower.jpg' 
+    feh  --bg-fill '/home/llucido/Pictures/wallpapers/solarized/flower.jpg'
 fi
-

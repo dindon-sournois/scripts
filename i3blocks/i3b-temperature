@@ -12,21 +12,5 @@ else
 		cpu_color=$color_norm
 fi
 
-# gpu=$(nvidia-settings -q gpucoretemp -t)
-# retval=$?
-# if [ $retval -eq 0 ]; then
-# 	gpu="$(echo $gpu | head -n1 | awk -F '.' '{printf $1}')"
-# 	if [ $gpu -ge 90 ]; then
-# 		gpu_color=$color_crit
-# 	elif [ $gpu -ge 70 ]; then
-# 		gpu_color=$color_warn
-# 	else
-# 		gpu_color=$color_norm
-# 	fi
-
-# 	printf "<span foreground=\"%s\">%s°C</span> <span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu $gpu_color $gpu
-# 	printf "<span foreground=\"%s\">%s°C</span> <span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu $gpu_color $gpu
-# else
-		printf "<span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu
-		printf "<span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu
-# fi
+printf "<span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu
+printf "<span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu

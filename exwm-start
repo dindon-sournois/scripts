@@ -1,0 +1,4 @@
+#!/bin/sh
+xhost +SI:localuser:$USER
+xsetroot -cursor_name left_ptr
+exec dbus-launch --exit-with-session emacs --eval "(exwm-enable)"

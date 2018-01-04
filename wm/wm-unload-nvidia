@@ -17,4 +17,5 @@ echo "10de 10f0" > /sys/bus/pci/drivers/vfio-pci/remove_id
 # repeat for extra devices
 rmmod nvidia_drm
 rmmod nvidia_modeset
+rmmod nvidia_uvm
 rmmod nvidia

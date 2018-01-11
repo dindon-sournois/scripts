@@ -28,60 +28,52 @@ FILE *fopen_check(char *path, char *mode)
 int main(void)
 {
     FILE *f;
-    int now, full, ac_status, rounded;
-    double percent;
+    int capacity, ac_status;
 
     f = fopen_check("/sys/class/power_supply/AC/online", "r");
     fscanf (f, "%d", &ac_status);
     fclose(f);
 
-    f = fopen_check("/sys/class/power_supply/BAT0/energy_full", "r");
-    fscanf (f, "%d", &full);
+    f = fopen_check("/sys/class/power_supply/BAT0/capacity", "r");
+    fscanf (f, "%d", &capacity);
     fclose(f);
-
-    f = fopen_check("/sys/class/power_supply/BAT0/energy_now", "r");
-    fscanf (f, "%d", &now);
-    fclose(f);
-
-    percent = ((double)now / full)*100;
-    rounded = (int)round(percent);
 
     char *icon, *color;
     if (ac_status)
         {
             icon = ICON_AC;
-            if (rounded >= 85)
+            if (capacity >= 85)
                 color = AC_FULL;
             else
                 color = AC_CHR;
         }
-    else if (rounded < 10)
+    else if (capacity < 10)
         {
             icon = ICON_L_10;
             color = BAT_CRIT;
         }
-    else if (rounded < 25)
+    else if (capacity < 25)
         {
             icon = ICON_L_25;
             color = BAT_WARN;
         }
-    else if (rounded < 50)
+    else if (capacity < 50)
         {
             icon = ICON_L_50;
             color = BAT_SAFE;
         }
-    else if (rounded < 85)
+    else if (capacity < 85)
         {
             icon = ICON_L_85;
             color = BAT_SAFE;
         }
-    else if (rounded >= 85)
+    else if (capacity >= 85)
         {
             icon = ICON_GE_85;
             color = BAT_SAFE;
         }
 
     /* i3blocks format */
-    printf("%s %d%%\n\n%s\n", icon, rounded, color);
+    printf("%s %d%%\n\n%s\n", icon, capacity, color);
     return 0;
 }

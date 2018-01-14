@@ -5,12 +5,18 @@ if [[ "$(hostname -s)" == "msi" ]]; then
     lxpolkit&
 fi
 
+if [ "$XDG_VTNR" -eq 1 ]; then
+	firefox&
+	thunderbird&
+	emacs --daemon
+fi
+
+if [ "$XDG_VTNR" -eq 2 ]; then
+	steam-native
+fi
+
 # i3-subscribe
-nm-applet&
 # xcmenu -daemon
-mpd
+nm-applet&
 dunst&
-firefox&
-thunderbird&
 i3-focus-last&
-emacs --daemon

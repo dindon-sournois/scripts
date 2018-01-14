@@ -15,7 +15,7 @@ int main()
     yyin = fopen("/proc/meminfo", "r");
     yylex();
 
-    // double used_mem = (total_mem - free_mem) / 1024 / 1024;
+    double used_mem = (total_mem - free_mem) / 1024 / 1024;
     int percent = ((total_mem - free_mem) / total_mem) * 100;
     free_mem = free_mem / 1024 / 1024;
 
@@ -28,7 +28,6 @@ int main()
         color = COL_SAFE;
 
     /* i3blocks pango format */
-    printf("<span foreground=\"%s\">%.1fG</span>\n", color, free_mem);
     printf("<span foreground=\"%s\">%.1fG</span>\n", color, free_mem);
     return 0;
 }

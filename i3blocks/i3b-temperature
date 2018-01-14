@@ -5,12 +5,21 @@ color_crit="#dc322f"
 
 cpu="$(/usr/lib/i3blocks/temperature --chip coretemp-isa-0000 | head -n1 | awk -F '.' '{printf $1}')"
 if [ $cpu -ge 90 ]; then
-	cpu_color=$color_crit
-elif [ $cpu -ge 70 ]; then
-	cpu_color=$color_warn
+	  cpu_color=$color_crit
+    icon=""
+elif [ $cpu -ge 76 ]; then
+	  cpu_color=$color_warn
+    icon=""
+elif [ $cpu -ge 64 ]; then
+		cpu_color=$color_norm
+    icon=""
+elif [ $cpu -ge 42 ]; then
+		cpu_color=$color_norm
+    icon=""
 else
 		cpu_color=$color_norm
+    icon=""
 fi
 
-printf "<span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu
-printf "<span foreground=\"%s\">%s°C</span>\n" $cpu_color $cpu
+printf "<span foreground=\"#2aa198\">%s</span> <span foreground=\"%s\">%s°C</span>\n" $icon $cpu_color $cpu
+

@@ -12,4 +12,3 @@ else
 fi
 
 printf "<span foreground=\"%s\">%s %s</span>\n" $color "$icon" "$state";
-printf "<span foreground=\"%s\">%s %s</span>\n" $color "$icon" "$state";

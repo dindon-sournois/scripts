@@ -1,7 +1,6 @@
 #!/bin/bash
 
 pacman=$(checkupdates 2> /dev/null | wc -l)
-aur=$(pacaur -k 2> /dev/null | wc -l)
-aur=$(( $aur - $pacman ))
+aur=$(package-query -Au 2> /dev/null | wc -l)
 echo -n \[$pacman\]
 echo \[$aur\]

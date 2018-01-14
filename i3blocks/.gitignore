@@ -1,7 +1,8 @@
-battery
-brightness
-memory
-mpdsong
-mpdtime
-mpdvolume
+i3b-battery
+i3b-brightness
+i3b-memory
+i3b-mpdsong
+i3b-mpdtime
+i3b-mpdvolume
 *.lex.c
+i3b-stat

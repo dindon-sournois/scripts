@@ -3,14 +3,14 @@
 if [[ "$(hostname -s)" == "msi" ]]; then
     synergy&
     lxpolkit&
+	thunderbird&
 fi
 
 # i3-subscribe
-nm-applet&
 # xcmenu -daemon
+nm-applet&
 mpd
 dunst&
 firefox&
-thunderbird&
 i3-focus-last&
 emacs --daemon

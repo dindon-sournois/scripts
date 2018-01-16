@@ -3,7 +3,7 @@
 
 function mimeo-command {
     mimeo \
-        --$1 firefox.desktop \
+        --$1 qutebrowser.desktop \
         --$1 calibre-ebook-viewer.desktop \
         --$1 inkscape.desktop \
         --$1 gimp.desktop \
@@ -21,7 +21,6 @@ function mimeo-command {
         --$1 mpv.desktop \
         --$1 qbittorrent.desktop \
         --$1 Thunar-folder-handler.desktop \
-        --$1 claws-mail.desktop \
         --$1 zeal.desktop \
         --$1 wine.desktop \
         --$1 steam.desktop \

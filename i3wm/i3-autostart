@@ -1,9 +1,8 @@
 #!/bin/bash
 
-if [[ "$(hostname -s)" == "msi" ]]; then
+if [[ "$(hostname -s)" == "msi" ]] && [ "$XDG_VTNR" -eq 1]; then
     synergy&
     lxpolkit&
-	thunderbird&
 fi
 
 if [ "$XDG_VTNR" -eq 1 ]; then

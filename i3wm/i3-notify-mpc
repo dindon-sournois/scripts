@@ -15,7 +15,7 @@ function mpc_notify() {
         long|toggle) time=$(mpc status | sed -n 2p | cut -d " " -f5);;
         *) ;;
     esac
-    notify-send -u low -t 500 "$song" "$time"
+    notify-send -u low -t 1500 "$song" "$time"
 }
 
 case "$1" in

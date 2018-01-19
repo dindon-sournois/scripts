@@ -3,11 +3,11 @@
 if [[ "$(hostname -s)" == "msi" ]] && [ "$XDG_VTNR" -eq 1]; then
     synergy&
     lxpolkit&
+	thunderbird&
 fi
 
 if [ "$XDG_VTNR" -eq 1 ]; then
-	firefox&
-	thunderbird&
+	qutebrowser&
 	emacs --daemon
 fi
 
@@ -20,3 +20,4 @@ fi
 nm-applet&
 dunst&
 i3-focus-last&
+i3-scrachpad&

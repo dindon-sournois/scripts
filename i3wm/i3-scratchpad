@@ -1,2 +1,2 @@
 #!/bin/bash
-termite --name scratchpad -c ~/.config/termite/config-dark-trans
+termite --name scratchpad -c ~/.config/termite/config

@@ -26,17 +26,18 @@ int main(void)
     if (value)
       sscanf(value, "%d", &block_button);
 
+    char *cmd = "/usr/bin/xbacklight";
     switch (block_button) {
       case (4): // scroll up
         if (fork() == 0) {
-          execl("/usr/bin/xbacklight", "/usr/bin/xbacklight", "-inc", "10", NULL);
+          execl(cmd, cmd, "-inc", "10", NULL);
           perror("execl");
           return 0;
         }
         break;
       case (5): // scroll down
         if (fork() == 0) {
-          execl("/usr/bin/xbacklight", "/usr/bin/xbacklight", "-dec", "10", NULL);
+          execl(cmd, cmd, "-dec", "10", NULL);
           perror("execl");
           return 0;
         }

@@ -1,6 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define ICON_AC ""
 #define ICON_L_10 ""
@@ -29,6 +31,24 @@ int main(void)
 {
     FILE *f;
     int capacity, ac_status;
+
+    int block_button = -1;
+    char * value = getenv("BLOCK_BUTTON");
+    if (value)
+      sscanf(value, "%d", &block_button);
+
+    switch (block_button) {
+    case (3): // right clic
+      if (fork() == 0) {
+        char *cmd = "/home/llucido/bin/i3b-notify-battery";
+        execl(cmd, cmd, NULL);
+        perror("execl");
+        return 0;
+      }
+      break;
+    default:
+      break;
+    }
 
     f = fopen_check("/sys/class/power_supply/AC/online", "r");
     fscanf (f, "%d", &ac_status);

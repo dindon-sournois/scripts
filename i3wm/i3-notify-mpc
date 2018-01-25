@@ -19,11 +19,11 @@ function mpc_notify() {
 }
 
 case "$1" in
-   prev) mpc --wait prev && mpc_notify short;;
-   next) mpc --wait next && mpc_notify short;;
-   toggle) mpc toggle --wait && mpc_notify toggle;;
-   status) mpc_notify long;;
-   stop) mpc stop;;
+   prev) mpc --wait prev && mpc_notify short && i3b-send-signal 5;;
+   next) mpc --wait next && mpc_notify short && i3b-send-signal 5;;
+   toggle) mpc toggle --wait && mpc_notify toggle && i3b-send-signal 5;;
+   status) mpc_notify long && i3b-send-signal 5;;
+   stop) mpc stop && i3b-send-signal 5;;
    minus) mpc volume -5 && i3b-send-signal 5;;
    plus) mpc volume +5 && i3b-send-signal 5;;
    *) ;;

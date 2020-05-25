@@ -1,9 +1,9 @@
 #!/bin/bash
-[[ "$(hostname -s)" != "x1c" ]] && exit 1
+[[ "$(hostname)" != "x1c" ]] && exit 1
 
-state=$(bluetooth | ag on | wc -l)
 color="#268bd2"
-if [ $state = 1 ]; then
+
+if [[ $(bluetoothctl show | grep "Powered: yes") ]]; then
     icon=""
     state="on"
 else

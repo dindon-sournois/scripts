@@ -1,8 +1,11 @@
 #!/bin/bash
+set -uxe
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit 1
 fi
+
+set -x
 
 echo "10de 1b81" > /sys/bus/pci/drivers/vfio-pci/remove_id
 echo "10de 10f0" > /sys/bus/pci/drivers/vfio-pci/remove_id

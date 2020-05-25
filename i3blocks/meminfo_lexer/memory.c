@@ -28,6 +28,6 @@ int main()
         color = COL_SAFE;
 
     /* i3blocks pango format */
-    printf("<span foreground=\"%s\">%.1fG</span>\n", color, free_mem);
+    printf("<span foreground=\"%s\"> %.1fG</span>\n", color, free_mem);
     return 0;
 }

@@ -3,23 +3,41 @@ color_norm="#93a1a1"
 color_warn="#b58900"
 color_crit="#dc322f"
 
-cpu="$(/usr/lib/i3blocks/temperature --chip coretemp-isa-0000 | head -n1 | awk -F '.' '{printf $1}')"
-if [ $cpu -ge 90 ]; then
-	  cpu_color=$color_crit
+cpu=$(sensors -u coretemp-isa-0000 | grep temp1_input | awk '{print $2}' | cut -d '.' -f1)
+
+lsmod | grep nvidia
+is_nvidia_loaded=$?
+
+if [[ $is_nvidia_loaded -eq 0 ]]; then
+  gpu=$(nvidia-smi -q -d TEMPERATURE | grep "GPU Current Temp" | awk '{print $5}')
+fi
+
+if [ $cpu -ge 85 ]; then
+    cpu_color=$color_crit
     icon=""
-elif [ $cpu -ge 76 ]; then
-	  cpu_color=$color_warn
-    icon=""
-elif [ $cpu -ge 64 ]; then
-		cpu_color=$color_norm
+elif [ $cpu -ge 70 ]; then
+    cpu_color=$color_warn
     icon=""
-elif [ $cpu -ge 42 ]; then
-		cpu_color=$color_norm
-    icon=""
 else
-		cpu_color=$color_norm
+    cpu_color=$color_norm
     icon=""
 fi
 
-printf "<span foreground=\"#2aa198\">%s</span> <span foreground=\"%s\">%s°C</span>\n" $icon $cpu_color $cpu
+if [[ $is_nvidia_loaded -eq 0 ]]; then
+  if [ $gpu -ge 85 ]; then
+      gpu_color=$color_crit
+  elif [ $gpu -ge 70 ]; then
+      gpu_color=$color_warn
+  else
+      gpu_color=$color_norm
+  fi
+fi
 
+printf "<span foreground=\"#2aa198\">%s</span> " $icon
+printf "<span foreground=\"%s\">%s°C</span>" $cpu_color $cpu
+
+if [[ $is_nvidia_loaded -eq 0 ]]; then
+  printf " <span foreground=\"%s\">%s°C</span>\n" $gpu_color $gpu
+else
+  printf "\n" $gpu_color $gpu
+fi

@@ -2,4 +2,4 @@
 
 time=$(date '+%H:%M')
 color="#93a1a1"
-printf "<span foreground=\"%s\">%s</span>\n" $color "$time";
+printf "<span foreground=\"%s\"> %s</span>\n" $color "$time";

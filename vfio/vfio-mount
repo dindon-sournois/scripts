@@ -1,0 +1,11 @@
+#!/bin/bash
+set -uxe
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
+modprobe nbd max_part=8
+qemu-nbd --connect=/dev/nbd0 /home/dindon/remote/drives/1/vm/data.qcow2
+sleep 0.5
+mount /dev/nbd0p2 /home/dindon/remote/vfio

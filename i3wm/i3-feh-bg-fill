@@ -1,6 +1,8 @@
 #!/bin/bash
-if [[ "$(hostname -s)" == "msi" ]]; then
-    feh  --bg-fill '/home/llucido/Pictures/wallpapers/solarized/flower.jpg'
-else
-    feh  --bg-fill '/home/llucido/Pictures/wallpapers/solarized/flower.jpg'
+if [[ "$HOME" == "msi" ]]; then
+    feh --image-bg="#ffffff" --bg-max "$HOME/Pictures/wallpapers/ffxiv1.png"
+fi
+
+if [[ "$HOME" == "x1c" ]]; then
+    feh --image-bg="#ffffff" --bg-max "$HOME/Pictures/wallpapers/ffxiv1.png"
 fi

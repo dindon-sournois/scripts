@@ -2,4 +2,4 @@
 
 long_date=$(date '+%a, %b %d')
 color="#93a1a1"
-printf "<span foreground=\"%s\">%s</span>\n" $color "$long_date";
+printf "<span foreground=\"%s\"> %s</span>\n" $color "$long_date";

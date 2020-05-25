@@ -34,7 +34,7 @@ int main()
 {
   unsigned long idle1, idle2, total1, total2;
   get(&idle1, &total1);
-  sleep(1);
+  usleep(500*1000);
   get(&idle2, &total2);
 
   unsigned long d_idle = idle2 - idle1;
@@ -42,14 +42,15 @@ int main()
   double tot_cpu_percent = 100 * (d_total - d_idle) / (double)d_total;
 
   char *color;
-  if (tot_cpu_percent > 60)
+  if (tot_cpu_percent > 350)
     color = COL_CRIT;
-  else if (tot_cpu_percent > 30)
+  else if (tot_cpu_percent > 99)
     color = COL_WARN;
   else
     color = COL_SAFE;
 
   /* i3blocks pango format */
-  printf("<span foreground=\"%s\">%.0f%%</span>\n", color, tot_cpu_percent);
+  // XXX number of logical cores
+  printf("<span foreground=\"%s\"> %.0f%%</span>\n", color, tot_cpu_percent*8);
   return 0;
 }

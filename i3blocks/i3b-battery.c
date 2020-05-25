@@ -40,7 +40,7 @@ int main(void)
     switch (block_button) {
     case (3): // right clic
       if (fork() == 0) {
-        char *cmd = "/home/llucido/bin/i3b-notify-battery";
+        char *cmd = "/home/dindon/bin/i3b-notify-battery";
         execl(cmd, cmd, NULL);
         perror("execl");
         return 0;

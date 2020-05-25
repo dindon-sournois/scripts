@@ -1,0 +1,11 @@
+#!/bin/bash
+set -uxe
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit 1
+fi
+
+umount /home/dindon/remote/vfio
+qemu-nbd --disconnect /dev/nbd0
+sleep 0.5
+rmmod nbd

@@ -1,28 +1,28 @@
 #!/bin/bash
 
-if [[ "$HOST" == "msi" ]] && [[ "$XDG_VTNR" -eq 1 ]]; then
-    synergy&
-    lxpolkit&
+if [[ "$HOST" == "msi" ]] && [ "$XDG_VTNR" -eq 1]; then
+  synergy&
+  lxpolkit&
 fi
 
-if [[ "$HOST" == "msi" ]] && [[ "$XDG_VTNR" -eq 2 ]]; then
-	  steam-runtime&
-    xrandr --output DP-2 --mode 2560x1440 --pos 0x0 --rotate normal -r 144&
+if [[ "$HOST" == "x1c" ]] || [ "$XDG_VTNR" -eq 2 ]; then
+  steam-native
+  xrandr --output DP-2 --mode 2560x1440 --pos 0x0 --rotate normal -r 144
 fi
 
 if [[ "$HOST" == "msi" ]]; then
-    thunderbird&
+  thunderbird&
 fi
 
-# i3-subscribe&
-# xcmenu -daemon&
 qutebrowser&
-emacs --daemon&
+emacs --daemon
+#i3-subscribe
+#xcmenu -daemon
 nm-applet&
 dunst&
 i3-focus-last&
 #i3-scrachpad&
-pamixer --set-volume 50&
-mpd&
-mpc pause&
+pamixer --set-volume 50
+mpd
+mpc pause
 #redshift -l 51.12:20.55&

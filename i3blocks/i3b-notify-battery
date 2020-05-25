@@ -1,3 +1,3 @@
 #!/bin/bash
 info=$(acpi -b)
-notify-send -u low -t 2000 "$info"
+notify-send -u "$1" -t 2000 "$info"

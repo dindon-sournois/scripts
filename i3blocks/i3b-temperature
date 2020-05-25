@@ -5,7 +5,7 @@ color_crit="#dc322f"
 
 cpu=$(sensors -u coretemp-isa-0000 | grep temp1_input | awk '{print $2}' | cut -d '.' -f1)
 
-lsmod | grep nvidia
+lsmod | grep nvidia > /dev/null 2> /dev/null
 is_nvidia_loaded=$?
 
 if [[ $is_nvidia_loaded -eq 0 ]]; then

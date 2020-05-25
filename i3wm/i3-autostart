@@ -6,23 +6,25 @@ if [[ "$HOST" == "msi" ]] && [ "$XDG_VTNR" -eq 1]; then
 fi
 
 if [[ "$HOST" == "x1c" ]] || [ "$XDG_VTNR" -eq 2 ]; then
-  steam-native
-  xrandr --output DP-2 --mode 2560x1440 --pos 0x0 --rotate normal -r 144
+  steam-native&
+  lutris&
+  xrandr --output DP-2 --mode 2560x1440 --pos 0x0 --rotate normal -r 144&
 fi
 
 if [[ "$HOST" == "msi" ]]; then
   thunderbird&
 fi
 
+discord&
+telegram-desktop&
 qutebrowser&
-emacs --daemon
+emacs --daemon&
 #i3-subscribe
 #xcmenu -daemon
 nm-applet&
 dunst&
 i3-focus-last&
 #i3-scrachpad&
-pamixer --set-volume 50
-mpd
-mpc pause
+pamixer --set-volume 50&
+(mpd ; mpc pause)&
 #redshift -l 51.12:20.55&

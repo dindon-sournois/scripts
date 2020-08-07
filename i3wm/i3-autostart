@@ -1,30 +1,35 @@
 #!/bin/bash
+host=$(hostname)
 
-if [[ "$HOST" == "msi" ]] && [ "$XDG_VTNR" -eq 1]; then
+if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 1]; then
   synergy&
   lxpolkit&
 fi
 
-if [[ "$HOST" == "x1c" ]] || [ "$XDG_VTNR" -eq 2 ]; then
-  steam-native&
+if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 2 ]; then
   lutris&
-  xrandr --output DP-2 --mode 2560x1440 --pos 0x0 --rotate normal -r 144&
+  # try to detect correct output in case I'm using another GPU port
+  output=$(xrandr --listactivemonitors | grep "DP-[0-9]" | head -n1 | awk '{print $NF}')
+  xrandr --output $output --mode 2560x1440 --pos 0x0 --rotate normal -r 144 --primary&
 fi
 
-if [[ "$HOST" == "msi" ]]; then
+if [[ "$host" == "msi" ]]; then
   thunderbird&
 fi
 
+# APPS
+steam-native&
 discord&
 telegram-desktop&
 qutebrowser&
+
+# DAEMONS
 emacs --daemon&
-#i3-subscribe
-#xcmenu -daemon
 nm-applet&
 dunst&
 i3-focus-last&
-#i3-scrachpad&
 pamixer --set-volume 50&
-(mpd ; mpc pause)&
+(mpc pause || (mpd && mpc pause))&
+#i3-subscribe
+#i3-scrachpad&
 #redshift -l 51.12:20.55&

@@ -5,7 +5,7 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
-umount /home/dindon/remote/vfio
+umount /home/$USER/remote/vfio
 qemu-nbd --disconnect /dev/nbd0
 sleep 0.5
 rmmod nbd

@@ -6,6 +6,6 @@ if [ "$EUID" -ne 0 ]
 fi
 
 modprobe nbd max_part=8
-qemu-nbd --connect=/dev/nbd0 /home/dindon/remote/drives/1/vm/data.qcow2
+qemu-nbd --connect=/dev/nbd0 /home/$USER/remote/drives/1/vm/data.qcow2
 sleep 0.5
-mount /dev/nbd0p2 /home/dindon/remote/vfio
+mount /dev/nbd0p2 /home/$USER/remote/vfio

@@ -14,18 +14,15 @@ function mimeo-command {
         --$1 libreoffice-draw.desktop \
         --$1 libreoffice-calc.desktop \
         --$1 libreoffice-base.desktop \
-        --$1 mumble.desktop \
         --$1 audacity.desktop \
         --$1 qpdfview.desktop \
         --$1 feh.desktop \
         --$1 mpv.desktop \
         --$1 qbittorrent.desktop \
         --$1 Thunar-folder-handler.desktop \
-        --$1 zeal.desktop \
         --$1 wine.desktop \
         --$1 steam.desktop \
-        --$1 emacs.desktop \
-        --$1 leafpad.desktop
+        --$1 emacs.desktop
 }
 
 mimeo-command prefer

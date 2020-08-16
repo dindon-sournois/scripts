@@ -1,8 +1,2 @@
 #!/bin/bash
-if [[ "$HOST" == "msi" ]]; then
-    feh --image-bg="#ffffff" --bg-max "$HOME/Pictures/wallpapers/ffxiv1.png"
-fi
-
-if [[ "$HOST" == "x1c" ]]; then
-    feh --image-bg="#ffffff" --bg-max "$HOME/Pictures/wallpapers/ffxiv1.png"
-fi
+feh --image-bg="#ffffff" --bg-max "$1"

@@ -1,0 +1,4 @@
+#!/bin/bash
+find . -regextype posix-egrep -regex ".*\.(h|c|f90|C|F90|F|f|cu|cuf)$" > cscope.files
+#ctags $(cat cscope.files)
+cscope -b -q

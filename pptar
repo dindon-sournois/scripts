@@ -1,0 +1,10 @@
+#!/bin/bash
+[ "$#" -ne 1 ] && exit 1
+pigz_script=$(mktemp)
+cat <<EOF > $pigz_script
+#!/bin/bash
+pigz -p 6 \$@
+EOF
+chmod +x $pigz_script
+tar -I $pigz_script -cf ${1%/}.tar.gz $1
+rm $pigz_script

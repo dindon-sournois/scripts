@@ -1,0 +1,5 @@
+#!/bin/bash
+cpu=$(cat /proc/cpuinfo | grep Hz | sort -u | awk '{print $3}' | sed 's/\.000000//g' | tr '\n' ' ')
+gpu=$(nvidia-smi -q -d CLOCK | grep "  Applications Clocks" -A1 | grep "Graphics" | sort -u | awk '{print $3$4'} | tr '\n' ' ')
+cpu_range=$(cpupower frequency-info | grep "current policy" | awk '{print "["$7"-"$10"GHz]"}')
+echo "GPU: $gpu CPU: $cpu $cpu_range"

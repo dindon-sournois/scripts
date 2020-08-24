@@ -1,0 +1,5 @@
+#!/bin/bash
+cpu=$(numastat -m | grep MemUsed | awk '{printf $2/1024" "$3/1024"\n"}')
+gpu=$( nvidia-smi -q -d MEMORY | grep Used | awk '{print $3}' | tr '\n' ' ' | sed 's/\([0-9]\+\) \([0-9]\+\)/[\1,\1] /g')
+echo "CPU (GB): $cpu"
+echo "GPU (MB): $gpu"

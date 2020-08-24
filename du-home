@@ -1,0 +1,2 @@
+#!/bin/bash
+(cd; du -sh $(ls -1d .* * | tail -n+3) | sort -h -k1,1)

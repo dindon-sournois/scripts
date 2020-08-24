@@ -1,0 +1,204 @@
+#!/bin/bash
+[[ -z $LSB_JOBID ]] && JOBID= || JOBID="${LSB_JOBID}."
+
+set -eu
+
+FLAMEGRAPH_ROOT="XXX"
+WORLD_RANK="$OMPI_COMM_WORLD_RANK"
+NODE_RANK="$OMPI_COMM_WORLD_LOCAL_RANK"
+NODE_SIZE="$OMPI_COMM_WORLD_LOCAL_SIZE"
+
+
+function ceil() {
+  echo "($1+$2-1)/$2" | /usr/bin/bc
+}
+
+MODE="default"
+#NGPUS=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
+NGPUS=6
+BIND=true
+BIND_RANKS=true
+BIND_GPUS=true
+BIND_THREADS=true
+PACK_SOCKET=0
+PACK_NODE=0
+SPREAD_SOCKET=0
+VERBOSE=0
+TARGET=-1
+PERF_OPT="-i" # no task inheritence for threads profiling
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -mode)
+    MODE="$2"
+    shift; shift
+    ;;
+    -target)
+    TARGET="$2"
+    shift; shift
+    ;;
+    -ngpus)
+    NGPUS="$2"
+    shift; shift
+    ;;
+    -nobind)
+    BIND=false
+    shift; 
+    ;;
+    -nobind_gpus)
+    BIND_GPUS=false
+    shift; 
+    ;;
+    -nobind_threads)
+    BIND_THREADS=false
+    shift; 
+    ;;
+    -nobind_ranks)
+    BIND_RANKS=false
+    shift; 
+    ;;
+    -pack_on_socket) # most likely broken
+    PACK_SOCKET=1
+    shift
+    ;;
+    -spread_on_socket) # most likely broken
+    SPREAD_SOCKET=1
+    shift
+    ;;
+    -pack_on_node) # most likely broken
+    PACK_NODE=1
+    shift
+    ;;
+    -perf_opt)
+    PERF_OPT="$2"
+    shift; shift
+    ;;
+    -v)
+    VERBOSE=1
+    shift
+    ;;
+    *) # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+RANKS_PER_NODE="$NODE_SIZE"
+RANKS_PER_GPU=$(ceil $RANKS_PER_NODE $NGPUS)
+
+if [[ $TARGET > -1 ]]; then
+  [[ $TARGET != $WORLD_RANK ]] && MODE="default"
+fi
+
+binding_ranks() {
+  threads_per_node=$(lscpu | grep "^CPU(s):" | awk '{print $NF}')
+  threads_per_core=$(lscpu | grep "Thread(s) per core:" | awk '{print $NF}')
+  [[ $PACK_NODE == 1 ]] && RANKS_PER_NODE=$((threads_per_node/threads_per_core))
+  [[ $SPREAD_SOCKET == 1 ]] && RANKS_PER_NODE=$((threads_per_node/threads_per_core/6))
+  b="$((RANK*$threads_per_node/RANKS_PER_NODE))"
+  [[ $PACK_SOCKET == 1 ]] && RANKS_PER_NODE=$((threads_per_node/threads_per_core))
+  e="$((b+$threads_per_node/RANKS_PER_NODE-1))" 
+  $BIND_RANKS && taskset="taskset -c $b-$e"
+}
+
+binding_threads() {
+  local b=$1
+  local e=$2
+  local thread_per_omp_thread=$(((e-b+1)/OMP_NUM_THREADS))
+  [[ $thread_per_omp_thread -ge $threads_per_core ]] && thread_per_omp_thread=$threads_per_core
+  export OMP_PROC_BIND=close
+  export OMP_PLACES="{$b:$thread_per_omp_thread}:$OMP_NUM_THREADS:$thread_per_omp_thread"
+}
+
+binding_gpu() {
+  local cores_per_device=$((threads_per_node/$NGPUS))
+  local b=$1
+  local e=$2
+  local d1=$((b/cores_per_device))
+  local d2=$((e/cores_per_device))
+  local CVD="$d1"
+  local i 
+  for ((i=$d1+1; i<=$d2; i++)); do
+    CVD="$CVD,$i"
+  done
+  export CUDA_VISIBLE_DEVICES=$CVD
+}
+
+taskset="" # default to none
+
+if $BIND; then
+  set +u
+  [[ -z $OMP_NUM_THREADS ]] && export OMP_NUM_THREADS=1
+  set -u
+
+  # binding ranks
+  binding_ranks
+
+  # binding gpus
+  $BIND_GPUS && binding_gpu $b $e 
+
+  # binding threads
+  $BIND_THREADS && binding_threads $b $e
+
+  if [[ $VERBOSE == 1 ]]; then
+    printf "rank %2d cudaVD %s rpn %2d places %12s rpg %d taskset %s %s %7s\n" \
+      $RANK $CUDA_VISIBLE_DEVICES $RANKS_PER_NODE $OMP_PLACES $RANKS_PER_GPU $taskset
+  fi
+
+fi
+
+PREFIX="${JOBID}$WORLD_RANK"
+
+case $MODE in
+default)
+  ${taskset} "$@"
+  ;;
+strace)
+  ${taskset} strace -s 1024 -f -o ${PREFIX}.strace "$@"
+  ;;
+nvprof)
+  # disable openmp profiling to avoid ongoing bug
+  ${taskset} nvprof -fo ${PREFIX}.nvprof --concurrent-kernels on --openmp-profiling off "$@"
+  ${taskset} nvprof --print-api-summary --print-gpu-summary --print-openacc-summary -i ${PREFIX}.nvprof 2> ${PREFIX}.nvprof.out
+  ;;
+nvprof-mem)
+  ${taskset} nvprof -fo ${PREFIX}.nvprof --concurrent-kernels on --openmp-profiling off -m dram_read_throughput,dram_write_throughput "$@"
+  ${taskset} nvprof --print-api-summary --print-gpu-summary --print-openacc-summary -i ${PREFIX}.nvprof 2> ${PREFIX}.nvprof.out
+  ;;
+gdb)
+  ${taskset} xterm -hold -e gdb -x gdb.cmd --args "$@"
+  ;;
+perf)
+  ${taskset} perf record $PERF_OPT --call-graph fp -o ${PREFIX}.perf "$@"
+  ;;
+flame)
+  FP="$FLAMEGRAPH_ROOT"
+  ${taskset} perf record $PERF_OPT --call-graph fp -o ${PREFIX}.perf "$@"
+  ${taskset} perf script -i ${PREFIX}.perf | ${FP}/stackcollapse-perf.pl --all | ${FP}/flamegraph.pl --title="$PREFIX" --hash > ${PREFIX}.perf.svg
+  rm -f ${PREFIX}.perf.old
+  ;;
+valgrind)
+  p=$(which mpirun | sed 's|/bin/mpirun$||')
+  supp1="${p}/share/pmix/pmix-valgrind.supp"
+  supp2="${p}/share/spectrum_mpi/openmpi-valgrind.supp"
+  supp3="${p}/share/hwloc/hwloc-valgrind.supp"
+  ${taskset} valgrind --suppressions=$supp1 --suppressions=$supp2 --suppressions=$supp3 --leak-check=full --show-reachable=yes --log-file=${PREFIX}.vg "$@"
+  ;;
+cuda-leak)
+  if [[ $WORLD_RANK == 0 ]]; then 
+    ${taskset} cuda-memcheck --leak-check full "$@"
+  else
+    ${taskset} "$@"
+  fi
+  ;;
+*)
+  echo "Unknown mode: $MODE"
+  exit 1
+  ;;
+esac

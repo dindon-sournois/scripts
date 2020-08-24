@@ -1,0 +1,181 @@
+#!/bin/bash
+
+# disable pathname expansion for 'find -name *.f90' command
+set -f 
+
+PRUNED_DIR="build doc"
+EXCLUDED_EXTENSIONS="mod mod.stamp"
+EXTENSIONS="f90 c h cu cuf cpp hpp"
+FORCE_FIND=0
+VERBOSE=0
+PAGER=0
+DEBUG=0
+COLOR=always
+VIM=0
+CASE_SENSITIVE="i"
+
+function usage () {
+cat <<EOF
+Usage:
+
+  $(basename $0) [options] pattern
+
+  -v            Echo the command used to search for pattern
+  -f            Use find command to list files (default when not in git folder)
+  -l            Dump output with the pager less
+  -nc           No color
+  -vi           Format for easy vim copy/paste
+  -I            Case sensitive search pattern
+
+  -i    LIST    File extensions (case-insensitive) included by find (default: "$EXTENSIONS")
+  -x    LIST    File extensions (case-insensitive) excluded by find (default: "$EXCLUDED_EXTENSIONS")
+  -p    LIST    Folder prefixes (case-insensitive) to prune by find (default: "$PRUNED_DIR")
+  -ai   LIST    Append LIST to the file extensions (case-insensitive) included by default
+  -ax   LIST    Append LIST to the file extensions (case-insensitive) excluded by default
+  -ap   LIST    Append LIST to the folder prefixes (case-insensitive) pruned by default
+EOF
+}
+#  -po           Prompt to open file
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -i)
+    EXTENSIONS="$2"
+    shift
+    shift
+    ;;
+    -x)
+    EXCLUDED_EXTENSIONS="$2"
+    shift
+    shift
+    ;;
+    -p)
+    PRUNED_DIR="$2"
+    shift
+    shift
+    ;;
+    -ai)
+    EXTENSIONS="$EXTENSIONS $2"
+    shift
+    shift
+    ;;
+    -ax)
+    EXCLUDED_EXTENSIONS="$EXCLUDED_EXTENSIONS $2"
+    shift
+    shift
+    ;;
+    -ap)
+    PRUNED_DIR="$PRUNED_DIR $2"
+    shift
+    shift
+    ;;
+    -v)
+    VERBOSE=1
+    shift
+    ;;
+    -f)
+    FORCE_FIND=1
+    shift
+    ;;
+    -l)
+    PAGER=1
+    shift
+    ;;
+    -nc)
+    COLOR=never
+    shift
+    ;;
+    -vi)
+    VIM=1
+    shift
+    ;;
+    -I)
+    CASE_SENSITIVE=""
+    shift
+    ;;
+    -ddd)
+    DEBUG=1
+    shift
+    ;;
+    -h|-help|--help)
+    echo "This is the Quickgrep tool from the Cognitive Spectrum Quickmake© toolkit."
+    usage
+    exit 0
+    ;;
+    *) # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if [[ $1 =~ ^-.* ]]; then
+  >&2 echo "Error. Invalid option: $1."
+  >&2 usage
+  exit 1
+fi
+if [[ $# != 1 ]]; then
+  >&2 echo "Error. Too many arguments: $@."
+  >&2 usage
+  exit 1
+fi
+
+dir=.
+#dir=${2:-.} TODO
+
+# Check if git repo
+if [[ $FORCE_FIND != 1 ]] && (cd ${dir} ; git branch >/dev/null 2>/dev/null); then
+    #finder="git ls-files -z"
+    finder="true" # useless command
+    handler="git grep --color=$COLOR -HIn${CASE_SENSITIVE}"
+    pfinder="$finder"
+else
+    # List folders to ignore
+    prune=""
+    for f in $PRUNED_DIR; do
+      prune="$prune -iname $f* -prune -or "
+    done
+    [[ $prune != "" ]] && prune="-type d ( $(echo $prune | sed 's/-or$//') ) -or"
+
+    # List extensions to ignore
+    eprune=""
+    for f in $EXCLUDED_EXTENSIONS; do
+      eprune="$eprune -iname *.$f -prune -or "
+    done
+    [[ $eprune != "" ]] && eprune="-type f ( $(echo $eprune | sed 's/-or$//') ) -or"
+
+    # List file type to include
+    extensions=""
+    for e in $EXTENSIONS; do
+      extensions="$extensions -iname *.$e -or "
+    done
+    [[ $extensions != "" ]] && extensions="-type f ( $(echo $extensions | sed 's/-or$//') )"
+
+    finder="find ${dir} $prune $eprune $extensions -type f -print0"
+    handler="xargs -0 -P 0 -n 40 grep --color=$COLOR -HIn${CASE_SENSITIVE}"
+    # Replace '(' by '\(' so the echoed command can be used by copy-pasting
+    pfinder="$(echo $finder | sed 's/(/\\(/g;s/)/\\)/g')"
+fi
+
+if [[ $DEBUG == 1 ]]; then
+  echo "Included: $EXTENSIONS"
+  echo "Excluded: $EXCLUDED_EXTENSIONS"
+  echo "Pruned:   $PRUNED_DIR"
+  exit 1
+fi
+
+[[ $PAGER == 0 ]] && PAGER="cat" || PAGER="less -nRF"
+
+# List files to look into, search for pattern in parallel, change the matched lines info to be vim friendly
+if [[ $VIM == 1 ]]; then
+  ${finder} | LC_ALL=C ${handler}                              "$1"  | sed -e 's/:\([^ ]*\):/ +\1 # /' -e 's/^/vi /' | $PAGER
+  [[ $VERBOSE == 1 ]] && echo "$pfinder | LC_ALL=C ${handler} \"$1\" | sed -e 's/:\([^ ]*\):/ +\1 # /' -e 's/^/vi /' | $PAGER"
+else
+  ${finder} | LC_ALL=C ${handler}                              "$1"  | $PAGER
+  [[ $VERBOSE == 1 ]] && echo "$pfinder | LC_ALL=C ${handler} \"$1\" | $PAGER"
+fi

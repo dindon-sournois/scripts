@@ -1,0 +1,7 @@
+#!/bin/bash
+set -ue
+JOB=$1
+HOST=$(bjobs $JOB | tail -n+2 | awk '{print $9}' | sed 's/^[0-9]\+\*//')
+CMD=$(ssh $HOST ". ~/.bash_profile; job_getcmd")
+ssh $HOST ". ~/.bash_profile; grepstack -o $PWD/$JOB.stack.org $CMD"
+echo $PWD/$JOB.stack.org

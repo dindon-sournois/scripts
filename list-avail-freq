@@ -1,0 +1,7 @@
+#!/bin/bash
+cpu_list=$(cpupower frequency-info | grep "available frequency steps" | awk '{$1=""; $2=""; $3=""; print}' | sed 's/ GHz,\?//g;s/^ *//' | fold -s -w 100)
+gpu_list=$(nvidia-smi --format=csv --query-supported-clocks=graphics | tail -n+2 | awk '{print $1'} | sort -n -u -r | tr '\n' ' ' | fold -s -w 100)
+echo "CPU (GHz):"
+echo "$cpu_list"
+echo "GPU (MHz):"
+echo "$gpu_list"

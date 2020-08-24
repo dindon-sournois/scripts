@@ -1,0 +1,87 @@
+#!/bin/bash
+set -eu
+
+I_STACK=""
+O_STACK="stack.org"
+SYMBOL=""
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -i)
+    I_STACK="$2"
+    shift
+    shift
+    ;;
+    -o)
+    O_STACK="$2"
+    shift
+    shift
+    ;;
+    -s)
+    SYMBOL="$2"
+    shift
+    shift
+    ;;
+    -h|-help|--help)
+    usage
+    exit 0
+    ;;
+    *) # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+BINARY=$(basename $1)
+echo $I_STACK $O_STACK $SYMBOL $BINARY
+
+
+if [[ $I_STACK == "" ]]; then
+  pids=$(pgrep $BINARY)
+  rm -f $O_STACK # backup
+  for pid in $pids; do 
+    echo "** $BINARY [ $pid ]" >> $O_STACK
+    gstack $pid | sed "s/^\(.*\)/[ $pid ]  \1/" >> $O_STACK #sed 's/^\(Thread [0-9]\+.*\)/*** \1/' 
+  done
+else
+  pids=$(grep "\[ [0-9]\+ \]$" -o $I_STACK | awk '{print $2}')
+fi
+
+if [[ $SYMBOL != "" ]]; then
+  [[ $I_STACK == "" ]] && I_STACK=$O_STACK
+  found_pids=$(grep "#[0-9]\+.* in $SYMBOL" $I_STACK | awk '{print $2}')
+  declare -a nf
+  for pid in $pids; do 
+    found=false
+    for fpid in $found_pids; do 
+      if [[ $fpid == $pid ]]; then
+        found=true
+      fi
+    done
+    #if [[ $found ]]; then
+    #  gstack $pid
+    #  read
+    #fi
+    if [[ $found == false ]]; then
+      echo "$pid : $SYMBOL not found"
+      nf+=( $pid )
+    fi
+  done
+  if [[ ${#nf[@]} > 0 ]]; then # at least one 
+    echo "Print stack ? (y/N) "
+    read print
+    if [[ $print == "y" || $print == "Y" ]]; then
+      for pid in ${nf[@]}; do
+        echo "$pid : $SYMBOL not found"
+        grep "^\[ $pid \]" $I_STACK | less -F
+        read
+      done
+    fi
+  fi
+fi

@@ -1,0 +1,3 @@
+#!/bin/bash
+set -ue
+perf script -i $1 | stackcollapse-perf.pl | flamegraph.pl > $1.svg

@@ -1,0 +1,5 @@
+#!/bin/bash
+set -ue
+PID=$(ps -u $USER | grep mpirun | awk '{print $1}')
+CMD=$(getcpid $PID | awk '{print $4}' | tail -n+2 | sort -u)
+echo $CMD

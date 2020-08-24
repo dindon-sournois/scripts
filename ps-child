@@ -1,0 +1,14 @@
+#!/bin/bash
+set -ue
+function getcpid() {
+    cpids=$(pgrep -P $1|xargs)
+    echo $cpids
+    for cpid in $cpids;
+    do
+        echo "$cpid"
+        getcpid $cpid
+    done
+}
+
+pid=$(getcpid $1)
+ps -o user,pid,stat,command -p $pid

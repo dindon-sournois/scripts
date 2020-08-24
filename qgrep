@@ -1,7 +1,13 @@
 #!/bin/bash
+# Fast grep tool to use when it's to much of a bother to install rg, ag or pt.
+#
+# When in git folder, use `git grep` which should be faster than any tool. When
+# not in git folder, use `find` with file extensions matching and folder
+# prunning to quickly list important files and then process those files in
+# parallel with `xargs`.
 
 # disable pathname expansion for 'find -name *.f90' command
-set -f 
+set -f
 
 PRUNED_DIR="build doc"
 EXCLUDED_EXTENSIONS="mod mod.stamp"
@@ -102,7 +108,6 @@ case $key in
     shift
     ;;
     -h|-help|--help)
-    echo "This is the Quickgrep tool from the Cognitive Spectrum Quickmake© toolkit."
     usage
     exit 0
     ;;

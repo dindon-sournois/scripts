@@ -8,11 +8,6 @@ WORLD_RANK="$OMPI_COMM_WORLD_RANK"
 NODE_RANK="$OMPI_COMM_WORLD_LOCAL_RANK"
 NODE_SIZE="$OMPI_COMM_WORLD_LOCAL_SIZE"
 
-
-function ceil() {
-  echo "($1+$2-1)/$2" | /usr/bin/bc
-}
-
 MODE="default"
 #NGPUS=$(nvidia-smi --query-gpu=name --format=csv,noheader | wc -l)
 NGPUS=6
@@ -27,12 +22,51 @@ VERBOSE=0
 TARGET=-1
 PERF_OPT="-i" # no task inheritence for threads profiling
 
+function usage () {
+cat <<EOF
+Usage:
+
+  $(basename $0) [options] pattern
+
+  -mode            MODE  Launch tool (default: no tool used). MODE can be any of the following:
+                           strace      System calls trace
+                           nvprof      GPU profiling
+                           nvprof-mem  GPU profiling with focus on memory bandwidth
+                           gdb         Spawn one interactive xterm terminals per rank with gdb.
+                           Commands can be read from a 'gdb.cmd' file
+                           perf        Hotspot profiling
+                           flame       Graphical hotspot profiling with flamegraph
+                           valgrind    Memory checks
+                           cuda-leak   CUDA memory leak
+  -perf_opt        OPT   Additional  options to pass to perf profiling tool (default: $PERF_OPT)
+  -target          RANK  Limit tool to target only rank number RANK (default: all ranks)
+  -ngpus                 Number of GPU per node (default: $NGPUS)
+  -nobind                Don't do any kind of binding
+  -nobind_gpus           Don't assign GPU to rank
+  -nobind_threads        Don't bind OpenMP threads
+  -nobind_ranks          Don't bind MPI ranks
+EOF
+}
+
+function ceil() {
+  echo "($1+$2-1)/$2" | /usr/bin/bc
+}
+
+if [[ $# < 1 ]]; then
+  usage
+  exit 1
+fi
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
 key="$1"
 
 case $key in
+    -h|-help|--help)
+        usage
+        exit 0
+    ;;
     -mode)
     MODE="$2"
     shift; shift
@@ -47,19 +81,19 @@ case $key in
     ;;
     -nobind)
     BIND=false
-    shift; 
+    shift;
     ;;
     -nobind_gpus)
     BIND_GPUS=false
-    shift; 
+    shift;
     ;;
     -nobind_threads)
     BIND_THREADS=false
-    shift; 
+    shift;
     ;;
     -nobind_ranks)
     BIND_RANKS=false
-    shift; 
+    shift;
     ;;
     -pack_on_socket) # most likely broken
     PACK_SOCKET=1
@@ -103,7 +137,7 @@ binding_ranks() {
   [[ $SPREAD_SOCKET == 1 ]] && RANKS_PER_NODE=$((threads_per_node/threads_per_core/6))
   b="$((RANK*$threads_per_node/RANKS_PER_NODE))"
   [[ $PACK_SOCKET == 1 ]] && RANKS_PER_NODE=$((threads_per_node/threads_per_core))
-  e="$((b+$threads_per_node/RANKS_PER_NODE-1))" 
+  e="$((b+$threads_per_node/RANKS_PER_NODE-1))"
   $BIND_RANKS && taskset="taskset -c $b-$e"
 }
 
@@ -123,7 +157,7 @@ binding_gpu() {
   local d1=$((b/cores_per_device))
   local d2=$((e/cores_per_device))
   local CVD="$d1"
-  local i 
+  local i
   for ((i=$d1+1; i<=$d2; i++)); do
     CVD="$CVD,$i"
   done
@@ -141,7 +175,7 @@ if $BIND; then
   binding_ranks
 
   # binding gpus
-  $BIND_GPUS && binding_gpu $b $e 
+  $BIND_GPUS && binding_gpu $b $e
 
   # binding threads
   $BIND_THREADS && binding_threads $b $e
@@ -191,7 +225,7 @@ valgrind)
   ${taskset} valgrind --suppressions=$supp1 --suppressions=$supp2 --suppressions=$supp3 --leak-check=full --show-reachable=yes --log-file=${PREFIX}.vg "$@"
   ;;
 cuda-leak)
-  if [[ $WORLD_RANK == 0 ]]; then 
+  if [[ $WORLD_RANK == 0 ]]; then
     ${taskset} cuda-memcheck --leak-check full "$@"
   else
     ${taskset} "$@"

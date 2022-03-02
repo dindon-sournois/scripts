@@ -1,2 +1,2 @@
 #!/bin/bash
-emacsclient -c -n -a "" -e "(calendar)"
+emacsclient --create-frame --frame-parameters='(quote (name . "calendar"))' -c -n -a "" -e "(calendar)"

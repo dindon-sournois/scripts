@@ -7,24 +7,24 @@ if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 1 ]; then
 fi
 
 if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 2 ]; then
-  lutris&
+  # lutris&
   # try to detect correct output in case I'm using another GPU port
   output=$(xrandr --listactivemonitors | grep "DP-[0-9]" | head -n1 | awk '{print $NF}')
   xrandr --output $output --mode 2560x1440 --pos 0x0 --rotate normal -r 144 --primary&
 fi
 
 if [[ "$host" == "msi" ]]; then
-  thunderbird&
+  # thunderbird&
 fi
 
 # APPS
-steam-native&
-discord&
-telegram-desktop&
+# steam-native&
+# discord&
+# telegram-desktop&
 qutebrowser&
 
 # DAEMONS
-emacs --daemon&
+#emacs --daemon&
 nm-applet&
 dunst&
 i3-focus-last&
@@ -33,3 +33,4 @@ pamixer --set-volume 50&
 #i3-subscribe
 #i3-scrachpad&
 #redshift -l 51.12:20.55&
+fcitx -d

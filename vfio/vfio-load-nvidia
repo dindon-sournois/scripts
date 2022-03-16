@@ -7,8 +7,8 @@ fi
 
 set -x
 
-echo "10de 1b81" > /sys/bus/pci/drivers/vfio-pci/remove_id
-echo "10de 10f0" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo "10de 2206" > /sys/bus/pci/drivers/vfio-pci/remove_id
+echo "10de 1aef" > /sys/bus/pci/drivers/vfio-pci/remove_id
 
 echo 1 > /sys/bus/pci/devices/0000:01:00.0/remove
 echo 1 > /sys/bus/pci/devices/0000:01:00.1/remove

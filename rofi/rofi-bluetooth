@@ -6,10 +6,15 @@ set -x
 #  + bluetooth configuration is done dynamically since the full card name
 # depends on the bluetooth device
 
-log_file="$HOME/.cache/rofi-bluetooth.log" # log for one BT connection only
+# log for one BT connection only
+log_file="$HOME/.cache/rofi-bluetooth.log"
+# card name for integrated speakers
 card_speakers="alsa_card.pci-0000_00_1f.3"
+# card name for USB headset
 card_headset="alsa_card.usb-SteelSeries_SteelSeries_Arctis_7P-00"
-card_bt="bluez_card." # will be concatenated with the bluetooth device address
+# card name for bluetooth card, will be concatenated with the device address
+card_bt="bluez_card."
+# output name, will probably need some tests to find the right one
 out_speakers="output:analog-stereo+input:analog-stereo"
 out_headset="output:analog-stereo+input:mono-fallback"
 out_bt="a2dp_sink"
@@ -26,7 +31,6 @@ toggle_bluetooth() {
     bluetoothctl power $status >/dev/null 2>&1
     bluetoothctl agent $status >/dev/null 2>&1
 }
-
 
 # rofi initial selection
 if [[ -z "$@" ]]; then
@@ -65,18 +69,18 @@ else
 
         # probably useless check but we can avoid activating bluetooth if the
         # user entered gibberish
-        [[ ${name} == "" ]] && leave
+        [[ "${name}" == "" ]] && leave
         echo "name: $name" >> ${log_file}
 
         # backup old bluetooth status
         old_status=$(bluetoothctl show | grep "Powered:" | awk '{print $2}')
         toggle_bluetooth on
 
-        selected=$(bluetoothctl devices | grep $name)
+        selected=$(bluetoothctl devices | grep "$name")
         echo "selected: $selected" >> ${log_file}
         # if no match, then either a device reported by bluetoothctl doesn't
         # exists anymore (unlikely) or the user entered gibberish
-        if [[ ${selected} == "" ]]; then
+        if [[ "${selected}" == "" ]]; then
             echo "no selection, leaving" >> ${log_file}
             toggle_bluetooth ${old_status}
             leave

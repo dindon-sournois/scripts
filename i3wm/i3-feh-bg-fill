@@ -1,2 +1,2 @@
 #!/bin/bash
-feh --image-bg="#ffffff" --bg-max "$1"
+feh --image-bg="#ffffff" --bg-max "$HOME/remote/drives/2/Pictures/wallpapers/ffxiv_16052020_203413_752.png"

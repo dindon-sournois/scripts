@@ -2,8 +2,9 @@
 host=$(hostname)
 
 if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 1 ]; then
-  synergy&
+  #synergy&
   lxpolkit&
+  virt-manager&
 fi
 
 if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 2 ]; then
@@ -11,25 +12,33 @@ if [[ "$host" == "msi" ]] && [ "$XDG_VTNR" -eq 2 ]; then
   # try to detect correct output in case I'm using another GPU port
   output=$(xrandr --listactivemonitors | grep "DP-[0-9]" | head -n1 | awk '{print $NF}')
   xrandr --output $output --mode 2560x1440 --pos 0x0 --rotate normal -r 144 --primary&
+
+  lutris&
+  steam-runtime& 
+  #steam-native&
+  #discord-canary&
+  #discord&
+  telegram-desktop&
+  rssguard&
 fi
 
 if [[ "$host" == "msi" ]]; then
-  # thunderbird&
+  true
+#  thunderbird&
 fi
 
 # APPS
-# steam-native&
-# discord&
-# telegram-desktop&
-qutebrowser&
+#firefox&
+#qbittorrent&
 
 # DAEMONS
 #emacs --daemon&
-nm-applet&
-dunst&
-i3-focus-last&
-pamixer --set-volume 50&
-(mpc pause || (mpd && mpc pause))&
+#dunst&
+#pamixer --set-volume 75&
+#(mpc pause || (mpd && mpc pause))&
+#nm-applet&
+
+#i3-focus-last&
 #i3-subscribe
 #i3-scrachpad&
 #redshift -l 51.12:20.55&
